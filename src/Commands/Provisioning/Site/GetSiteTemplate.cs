@@ -9,6 +9,7 @@ using PnP.Framework.Provisioning.ObjectHandlers;
 using PnP.Framework.Provisioning.Providers;
 
 using PnP.Framework.Provisioning.Providers.Xml;
+using PnP.Framework.Provisioning.Providers.Markdown;
 using File = System.IO.File;
 using Resources = PnP.PowerShell.Commands.Properties.Resources;
 using System.Collections;
@@ -185,19 +186,20 @@ namespace PnP.PowerShell.Commands.Provisioning.Site
             var extension = "";
             if (packageName != null)
             {
+                WriteInformation(new InformationRecord("Checking packagename " + packageName,"ExtractTemplate"));
                 if (packageName.IndexOf(".", StringComparison.Ordinal) > -1)
                 {
                     extension = packageName.Substring(packageName.LastIndexOf(".", StringComparison.Ordinal)).ToLower();
                 }
                 else
                 {
-                    packageName += ".pnp";
+                    packageName += ".pnpoooo";
                     extension = ".pnp";
                 }
             }
 
             var fileSystemConnector = new FileSystemConnector(path, "");
-            if (extension == ".pnp")
+            if (extension == ".pnp" || extension == ".md")
             {
                 creationInformation.FileConnector = new OpenXMLConnector(packageName, fileSystemConnector);
             }
@@ -398,6 +400,12 @@ namespace PnP.PowerShell.Commands.Provisioning.Site
                     var templateFileName = packageName.Substring(0, packageName.LastIndexOf(".", StringComparison.Ordinal)) + ".xml";
 
                     provider.SaveAs(template, templateFileName, formatter, TemplateProviderExtensions);
+                }
+                else if (extension == ".md")
+                {
+                    MarkdownTemplateProvider provider = new MarkdownFileSystemTemplateProvider(path, "");
+                    formatter = new MarkdownPnPFormatter();
+                    provider.SaveAs(template, Path.Combine(path, packageName), formatter, TemplateProviderExtensions);
                 }
                 else
                 {
